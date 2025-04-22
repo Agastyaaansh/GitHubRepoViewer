@@ -23,8 +23,6 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class RepositoriesFragment : Fragment() {
     private var _binding: FragmentRepositoriesBinding? = null
-
-
     private val binding get() = _binding!!
 
     private val viewModel: RepositoriesViewModel by viewModels()
@@ -63,7 +61,7 @@ class RepositoriesFragment : Fragment() {
                     val totalItemCount = layoutManager.itemCount
 
                     if (lastVisibleItemPosition == totalItemCount - 1 && !viewModel.isLoading.value) {
-                        viewModel.loadRepositories()
+                        viewModel.loadRepositories() // This will now work
                     }
                 }
             })
@@ -74,6 +72,10 @@ class RepositoriesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.repositories.collect { repos ->
+                    if (repos.isEmpty() && !viewModel.isLoading.value) {
+                        // Show message if no repositories found
+                        showSnackbar("No repositories found for this user")
+                    }
                     adapter.submitList(repos.toList())
                 }
             }
@@ -91,7 +93,11 @@ class RepositoriesFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.error.collect { error ->
                     error?.let {
-                        Snackbar.make(binding.root, it, Snackbar.LENGTH_LONG).show()
+                        when {
+                            it.contains("404") -> showSnackbar("User not found")
+                            it.contains("403") -> showSnackbar("API rate limit exceeded")
+                            else -> showSnackbar(it)
+                        }
                     }
                 }
             }
@@ -104,9 +110,17 @@ class RepositoriesFragment : Fragment() {
             if (username.isNotEmpty()) {
                 viewModel.setUsername(username)
             } else {
-                Snackbar.make(binding.root, "Please enter a username", Snackbar.LENGTH_SHORT).show()
+                showSnackbar("Please enter a username")
             }
         }
+    }
+
+    private fun showSnackbar(message: String, retryAction: (() -> Unit)? = null) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).apply {
+            retryAction?.let { action ->
+                setAction("Retry") { action() }
+            }
+        }.show()
     }
 
     override fun onDestroyView() {
