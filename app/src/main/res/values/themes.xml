@@ -1,0 +1,13 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+<!--    <style name="Base.Theme.Githubrepos" parent="Theme.Material3.DayNight.NoActionBar">-->
+<!--        &lt;!&ndash; Customize your light theme here. &ndash;&gt;-->
+<!--        &lt;!&ndash; <item name="colorPrimary">@color/my_light_primary</item> &ndash;&gt;-->
+<!--    </style>-->
+
+<!--    <style name="Theme.Githubrepos" parent="Base.Theme.Githubrepos" />-->
+
+    <style name="Theme.Githubrepos" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Change to Theme.Material3.DayNight.DarkActionBar if you want default ActionBar -->
+    </style>
+</resources>
